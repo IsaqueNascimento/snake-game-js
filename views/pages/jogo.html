@@ -3,9 +3,14 @@
 <body onKeyDown="pegadirecao(event.keyCode);">
 
 <h2 align="center">Isaque Nascimento</h2>
-
 <div id=principal></div>
+<p align="center">
+
+    <input  type = "button" value = "Reset" id = "btResetar" >
+    
+    </p>
 <script>
+    var btResetar =  document.getElementById("btResetar")
     tabuleiro="<table align=center border=1>";
     for(x=0;x<10;x++){
         tabuleiro+="<tr>";
@@ -49,6 +54,12 @@
         if(tecla==39)direcao=2;
         if(tecla==40)direcao=3;
     }
+    btResetar.addEventListener("click"  , ResetarCampos);
+
+function ResetarCampos (){
+  
+location.reload();
+}
 </script>
 </body>
 </html>
