@@ -1,65 +1,136 @@
 <!DOCTYPE html>
 <html>
-<body onKeyDown="pegadirecao(event.keyCode);">
-
-<h2 align="center">Isaque Nascimento</h2>
-<div id=principal></div>
-<p align="center">
-
-    <input  type = "button" value = "Reset" id = "btResetar" >
-    
-    </p>
+<head>
+  <title></title>
+  <div style="text-align:center"><u><h2>Isaque</h2></u>
+<u><p><h2>Nascimento</h2></p></u></div>
+  <style>
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+  body {
+    background: cyan;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  canvas {
+    border: 10px solid black;
+  }
+  </style>
+</head>
+<body>
+<canvas width="600" height="600" id="game"></canvas>
+<input type="button" value ="Reset" id="btResetar">
 <script>
-    var btResetar =  document.getElementById("btResetar")
-    tabuleiro="<table align=center border=1>";
-    for(x=0;x<10;x++){
-        tabuleiro+="<tr>";
-        for(y=0;y<10;y++)
-            tabuleiro+="<td id=td"+x+"_"+y+" style='width:30px; height:30px;'> </td>";
-        tabuleiro+="</tr>";
-    }
-    document.getElementById('principal').innerHTML=tabuleiro+"</table>";
-    cobra=[[5,0]];
-    direcao=2;
-    mx=parseInt(Math.random()*10);
-    my=parseInt(Math.random()*10);
-    vivo=true;
-    function anda(){
-        document.getElementById('td'+cobra[cobra.length-1][0]+'_'+cobra[cobra.length-1][1]).style.background="#ffffff";
-        if(mx==cobra[cobra.length-1][0]&&my==cobra[cobra.length-1][1]){
-            mx=parseInt(Math.random()*10);
-            my=parseInt(Math.random()*10);
-            cobra[cobra.length]=[10,10];
-        }
-        for(x=cobra.length-1;x>0;x--){
-            cobra[x][0]=cobra[x-1][0];
-            cobra[x][1]=cobra[x-1][1];
-        }
-        if(direcao==0)cobra[0][1]--;
-        if(direcao==1)cobra[0][0]--;
-        if(direcao==2)cobra[0][1]++;
-        if(direcao==3)cobra[0][0]++;
-        for(x=1;x<cobra.length;x++)if(cobra[0][0]==cobra[x][0]&&cobra[0][1]==cobra[x][1])vivo=false;
-        if(cobra[0][0]<0||cobra[0][1]<0||cobra[0][0]>9||cobra[0][1]>9)vivo=false;
-        document.getElementById('td'+cobra[0][0]+'_'+cobra[0][1]).style.background="#333333";
-        document.getElementById('td'+mx+'_'+my).style.background="#ff3333";
-        if(vivo)setTimeout('anda()',300);
-        else alert('Fim de jogo');
-    }
-    anda();
-    function pegadirecao(tecla){
-        /*alert(tecla);*/
-        if(tecla==37)direcao=0;
-        if(tecla==38)direcao=1;
-        if(tecla==39)direcao=2;
-        if(tecla==40)direcao=3;
-    }
-    btResetar.addEventListener("click"  , ResetarCampos);
-
-function ResetarCampos (){
+var btResetar = document.getElementById("btResetar")
+var canvas = document.getElementById('game');
+var context = canvas.getContext('2d');
+var grid = 16;
+var count = 0;
   
+var snake = {
+  x: 160,
+  y: 160,
+  dx: grid,
+  dy: 0,
+  
+  cells: [],
+  
+  maxCells: 4
+};
+var apple = {
+  x: 320,
+  y: 320
+};
+
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
+function loop() {
+  requestAnimationFrame(loop);
+  if (++count < 4) {
+    return;
+  }
+  count = 0;
+  context.clearRect(0,0,canvas.width,canvas.height);
+  snake.x += snake.dx;
+  snake.y += snake.dy;
+  if (snake.x < 0) {
+    snake.x = canvas.width - grid;
+  }
+  else if (snake.x >= canvas.width) {
+    snake.x = 0;
+  }
+  
+  if (snake.y < 0) {
+    snake.y = canvas.height - grid;
+  }
+  else if (snake.y >= canvas.height) {
+    snake.y = 0;
+  }
+  snake.cells.unshift({x: snake.x, y: snake.y});
+  if (snake.cells.length > snake.maxCells) {
+    snake.cells.pop();
+  }
+  context.fillStyle = 'red';
+  context.fillRect(apple.x, apple.y, grid-1, grid-1);
+  context.fillStyle = 'green';
+  snake.cells.forEach(function(cell, index) {
+    context.fillRect(cell.x, cell.y, grid-1, grid-1);  
+    if (cell.x === apple.x && cell.y === apple.y) {
+      snake.maxCells++;
+      apple.x = getRandomInt(0, 25) * grid;
+      apple.y = getRandomInt(0, 25) * grid;
+    }
+
+    for (var i = index + 1; i < snake.cells.length; i++) {
+      if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
+        snake.x = 160;
+        snake.y = 160;
+        snake.cells = [];
+        snake.maxCells = 4;
+        snake.dx = grid;
+        snake.dy = 0;
+        apple.x = getRandomInt(0, 25) * grid;
+        apple.y = getRandomInt(0, 25) * grid;
+      }
+    }
+  });
+}
+
+document.addEventListener('keydown', function(e) {
+
+  if (e.which === 37 && snake.dx === 0) {
+    snake.dx = -grid;
+    snake.dy = 0;
+  }
+
+  else if (e.which === 38 && snake.dy === 0) {
+    snake.dy = -grid;
+    snake.dx = 0;
+  }
+
+  else if (e.which === 39 && snake.dx === 0) {
+    snake.dx = grid;
+    snake.dy = 0;
+  }
+  else if (e.which === 40 && snake.dy === 0) {
+    snake.dy = grid;
+    snake.dx = 0;
+  }
+});
+
+requestAnimationFrame(loop);
+btResetar.addEventListener("click"  , ResetarCampos);
+
+ function ResetarCampos (){
+   
 location.reload();
 }
 </script>
+
 </body>
 </html>
